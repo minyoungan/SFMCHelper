@@ -1,0 +1,79 @@
+%%[
+    // Set AMPscript variable @p to the value of the query parameter "p"
+    SET @p = QueryParameter("p")
+]%%
+
+<script runat="server">
+    // Load the core platform functionality
+    Platform.Load("core", "1");
+
+    // Create a new instance of the WSProxy class
+    var api = new Script.Util.WSProxy();
+
+    // Retrieve the AMPscript variable @p and store it in the JavaScript variable p
+    var p = Variable.GetValue("@p");
+
+    try {
+        // Assign the value of p to customerKey
+        var customerKey = p;
+
+        // Define the columns to be retrieved from the DataExtensionField object
+        var cols = [
+            "Name", 
+            "MaxLength", 
+            "IsRequired", 
+            "FieldType", 
+            "DefaultValue", 
+            "Ordinal"
+        ];
+
+        // Execute the retrieve call to get the Data Extension fields
+        var result = api.retrieve("DataExtensionField", cols, {
+            Property: "DataExtension.CustomerKey",
+            SimpleOperator: "equals",
+            Value: customerKey
+        });
+
+        // Initialize the HTML for the table
+        var tableHTML = 
+            '<table border="1">' +
+                '<thead>' +
+                    '<tr>' +
+                        '<th>Name</th>' +
+                        '<th>Data Type</th>' +
+                        '<th>Length</th>' +
+                        '<th>Primary Key</th>' +
+                        '<th>Nullable</th>' +
+                        '<th>Default Value</th>' +
+                    '</tr>' +
+                '</thead>' +
+                '<tbody>';
+
+        // Loop through the results and populate the table rows
+        for (var i = 0; i < result.Results.length; i++) {
+            var field = result.Results[i];
+            tableHTML += 
+                '<tr>' +
+                    '<td>' + field.Name + '</td>' +
+                    '<td>' + field.FieldType + '</td>' +
+                    '<td>' + field.MaxLength + '</td>' +
+                    '<td>' + (field.IsPrimaryKey ? 'Yes' : 'No') + '</td>' +
+                    '<td>' + (field.IsRequired ? 'No' : 'Yes') + '</td>' +
+                    '<td>' + (field.DefaultValue || '') + '</td>' +
+                '</tr>';
+        }
+
+        // Close the table tags
+        tableHTML += 
+                '</tbody>' +
+            '</table>';
+
+        // Write the table HTML to the output
+        Write(tableHTML);
+
+    } catch(error) {
+        // If an error occurs, write the error message to the output
+        Write(Stringify(error));
+    }
+
+</script>

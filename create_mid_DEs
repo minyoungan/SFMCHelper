@@ -1,0 +1,58 @@
+<script runat="server">
+Platform.Load("Core", "1.1.1");
+
+try {
+    var deName = "BusinessUnits";
+    var customerKey = "BusinessUnits"; // Unique external key
+
+    // 1. Define the Data Extension Schema
+    var deConfig = {
+        "CustomerKey": customerKey,
+        "Name": deName,
+        "Fields": [
+            {
+                "Name": "MID",
+                "FieldType": "Text",
+                "MaxLength": 50,
+                "IsPrimaryKey": true,
+                "IsRequired": true
+            },
+            {
+                "Name": "BUName",
+                "FieldType": "Text",
+                "MaxLength": 255,
+                "IsRequired": true
+            },
+            {
+                "Name": "DateAdded",
+                "FieldType": "Date",
+                "DefaultValue": "getdate()"
+            }
+        ]
+    };
+
+    // 2. Create the Data Extension
+    var newDE = DataExtension.Add(deConfig);
+    Write("DE Creation Status: " + newDE.CustomerKey + " created successfully.<br>");
+
+    // 3. Populate with your HTML data
+    var buData = [
+        { mid: "53600865", BUName: "EU" },
+        { mid: "53600910", BUName: "France" },
+        { mid: "53600881", BUName: "Germany" }
+    ];
+
+    var rowsAdded = 0;
+    var targetDE = DataExtension.Init(customerKey);
+
+    for (var i = 0; i < buData.length; i++) {
+        targetDE.Rows.Add(buData[i]);
+        rowsAdded++;
+    }
+
+    Write("Rows successfully inserted: " + rowsAdded);
+
+} catch (err) {
+    Write("Error: " + Stringify(err));
+}
+</script>
